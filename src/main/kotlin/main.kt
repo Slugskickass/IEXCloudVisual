@@ -1,9 +1,6 @@
 import androidx.compose.desktop.Window
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.Text
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -29,9 +26,12 @@ import java.net.URL
 
 import androidx.compose.desktop.Window
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 
 
@@ -49,14 +49,15 @@ fun main() = Window {
     )
     val csvData = "src/resources/stocks.csv"
     val out = loadcsv(csvData)
-    Row {
-    for (item in out) {
-        getimagefile(fixnames(item.name), cloudClient)
-        showstock(item)
-    }
-}
+    Scaffold(
+        topBar = { TopAppBar(title = {Text("TopAppBar")},backgroundColor = Color.LightGray)  },
+        drawerContent = { Text(text = "drawerContent") },
+        bodyContent = { buildstocks(out, cloudClient) },
+        bottomBar = { BottomAppBar(backgroundColor = Color.DarkGray) { Text("BottomAppBar") } }
+    )
 
-}
+    }
+
 
 public class Stock(val id: Int, var name: String, val number_held: Int, val stock_currency: String,
                    val start_val: Double, val current_val: Double, val current_return: Double, val current_holding: Double)
@@ -98,6 +99,15 @@ fun getimagefile(name: String, tradingclient: IEXCloudClient): String {
 
 fun imageFromFile(file: File): ImageBitmap {
     return Image.makeFromEncoded(file.readBytes()).asImageBitmap() }
+
+@Composable fun buildstocks(out: MutableList<Stock>, cloudClient: IEXCloudClient){
+    ScrollableColumn  {
+    for (item in out) {
+        getimagefile(fixnames(item.name), cloudClient)
+        showstock(item)
+    }
+}
+}
 
 @Composable fun showstock(currentstock: Stock){
     val tempfilename = basefilename + fixnames(currentstock.name) + ".png"

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -43,8 +45,6 @@ fun main() = Window() {
         IEXCloudTokenBuilder().withPublishableToken(tokens).build()
     )
     val csvData = "src/resources/stocks.csv"
-
-  //  var out = remember { mutableStateOf(initialstocks(loadcsv(csvData), cloudClient)) }
 
     var out = initialstocks(loadcsv(csvData), cloudClient)
     playtimer(out, cloudClient)
@@ -118,11 +118,22 @@ fun playtimer(stocks: MutableList<Stock>, cloudClient: IEXCloudClient) {
 }
 
 fun updateprice(stocks: MutableList<Stock>, cloudClient: IEXCloudClient) {
-    stocks.map {it.current_val = getcurrentvalue(it.name, cloudClient) }
-    stocks.map {it.current_holding = it.current_val * it.number_held.toBigDecimal()}
-    print(stocks.component1().name)
-    print(" ")
-    println(stocks.component1().current_val)
+
+    for (item in stocks){
+        val holddata = item
+        val pos = stocks.indexOfFirst { it.name == holddata.name}
+        holddata.current_val = 0.0.toBigDecimal()//getcurrentvalue(holddata.name, cloudClient)
+        holddata.current_holding = holddata.current_val * holddata.number_held.toBigDecimal()
+        stocks[pos] = holddata
+        println(item.name)
+        println(holddata.name)
+    }
+
+//    stocks.map {it.current_val = getcurrentvalue(it.name, cloudClient) }
+//    stocks.map {it.current_holding = it.current_val * it.number_held.toBigDecimal()}
+//    print(stocks.component1().name)
+//    print(" ")
+//    println(stocks.component1().current_val)
 }
 
 fun getcurrentvalue(name: String, cloudClient: IEXCloudClient): BigDecimal {
@@ -157,6 +168,8 @@ fun printoutstocks(stocks: MutableList<Stock>){
 @Composable fun showstock(currentstock: Stock) {
     val tempfilename = basefilename + (currentstock.name) + ".png"
     val image = imageFromFile(File(tempfilename))
+
+
 
     val mycolour = if (currentstock.current_val - currentstock.start_val.toBigDecimal() > 0.0.toBigDecimal())
     {
@@ -195,6 +208,7 @@ fun printoutstocks(stocks: MutableList<Stock>){
 
                 }
             }
+            Button(onClick = {println("TEST")}) {Text("Button")}
         }
     }
 }
@@ -224,4 +238,6 @@ fun printoutstocks(stocks: MutableList<Stock>){
 @Composable fun testbutton(stocks: MutableList<Stock>){
     Button( onClick = {printoutstocks(stocks)}){Text("Test")}
 }
+
+
 
